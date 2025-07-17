@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    environment:
+      - MSSQL_HOST=mssql
+      - MSSQL_USER=sa
+      - MSSQL_PASSWORD=snehaHarari*
+      - MSSQL_DATABASE=AdventureWorks2019
+      - MSSQL_PORT=1433
+      - MSSQL_ENCRYPT=false
+      - PG_HOST=postgres
+      - PG_USER=postgres
+      - PG_PASSWORD=root
+      - PG_DATABASE=target_db
+      - PG_PORT=5432
+    depends_on:
+      - postgres
+      - mssql
+
+  frontend:
+    build:
+      context: ./db-migration-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://backend:5000/api
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: target_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: snehaHarari*
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+volumes:
+  pg_data:
+  mssql_data:
